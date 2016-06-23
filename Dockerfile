@@ -6,7 +6,6 @@ RUN apk add --no-cache tftp-hpa && \
 
 VOLUME /tftpboot
 
-EXPOSE 69
 EXPOSE 69/udp
 
 ENTRYPOINT ["/usr/sbin/in.tftpd"]
