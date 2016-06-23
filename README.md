@@ -30,7 +30,7 @@ $ docker inspect -f '{{ .NetworkSettings.IPAddress }}' c57e33
 Start another container using interactive mode, which will be our client for testing purposes:
 
 ```
-$ docker run --entrypoint sh -it herrera/tftpd:1.0.0
+$ docker run --rm --entrypoint sh -it herrera/tftpd:1.0.0
 ```
 
 Verify the filesystem contents:
@@ -57,4 +57,16 @@ View the testing file contents:
 ```
 / # cat file-00.txt
 testing-00
+```
+
+Exit destroying the client container (since we started it with the "--rm" option):
+```
+/ # exit
+```
+
+Kill the server container and remove its data traces:
+```
+$ docker kill c57e33 && docker rm -v c57e33
+c57e33f60993
+c57e33f60993
 ```
