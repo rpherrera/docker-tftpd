@@ -70,3 +70,7 @@ $ docker kill c57e33 && docker rm -v c57e33
 c57e33f60993
 c57e33f60993
 ```
+
+## External References
+
+ - [Docker Hub Repository](https://hub.docker.com/r/herrera/tftpd/)
