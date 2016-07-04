@@ -4,7 +4,17 @@
 
 This Dockerfile provides you a simple tftpd daemon. The directory "/tftpdboot" from filesystem is exposed as a volume and you can mount it in order to get your files properly served. Only the UDP/69 port is exposed.
 
-## Usage Example
+## Usage Examples
+
+There are 2 usage examples and they came from distinct phases from the project development. While the first one (called "Host to Guest Communication") aims the general public and it is more simple and straight forward in a sense of stack usage, the second one (called "Inter-Containers Communication") aims to provide the first steps from a troubleshooting guidance.
+
+The motivations behind "Host to Guest Communication" resembles the fact that Docker experimental release (1.12.0-rc2) for Mac OS X did not supported network bridging and this made unfeasible to employ advanced network routing to/from containers, even using PF, so in order to circumvent this situation and be capable of properly serving firmwares, the tftpd Docker container was embedded into a Vagrant Virtual Machine using Virtual Box driver. It is being setup with an IP address (192.168.0.66) where some TP-Link routers (tested models are TL-WDR3600 or TL-WR841ND) expect to find rescue firmware files by means of tftp protocol (UDP/69) after being hard reset (also known as 30/30/30 procedure).
+
+### Host to Guest Communication
+
+
+
+### Inter-Docker Communication
 
 Please remember that you are encouraged to mount a local directory that you want to serve right into the exposed volume, so first make sure to create this directory first and fill it with your files:
 
