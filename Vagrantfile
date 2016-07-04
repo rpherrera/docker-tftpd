@@ -24,7 +24,7 @@ Vagrant.configure('2') do |config|
 
     config.vm.network 'private_network', ip: '192.168.0.66'
 
-    config.vm.synced_folder "./tftpboot/", "/vagrant/tftpboot", owner: "ubuntu", group: "ubuntu"
+    config.vm.synced_folder "tftpboot", "/vagrant/tftpboot"
 
     config.vm.provision 'docker' do |docker|
       docker.run 'tftpd', image: 'herrera/tftpd:1.0.0', args: '-v /vagrant/tftpboot:/tftpboot -p 69:69/udp'
