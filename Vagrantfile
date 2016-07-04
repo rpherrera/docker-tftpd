@@ -4,17 +4,14 @@
 # Notes:
 #
 # 1.  This is a Vagrantfile example that can be used to serve firmwares to some
-# routers from TP-Link family (e.g.: TL-WDR3600 or TL-WR841ND) after the
-# 30/30/30 process. It uses the tftpd as a Docker container to serve the files
-# placed under the './tftpboot' local directory.
+# routers from TP-Link family (e.g.: TL-WDR3600 or TL-WR841ND) right after they
+# being hard reset (also known as 30/30/30 procedure). It uses tftpd as a Docker
+# container to serve files placed under './tftpboot' directory from Host system.
 #
-# 2.1.  Please note that you must keep installed the same Virtual Box guest
-# additions version into both Host and Guest systems. So do yourself a favor and
-# install the 'vagrant-vbguest' plugin before running 'vagrant up':
+# 2.  You must keep installed the same version from Virtual Box guest additions
+# into both Host and Guest systems. So, please do yourself a favor and before
+# running 'vagrant up' command install the 'vagrant-vbguest' plugin by means of:
 #     $ vagrant plugin install vagrant-vbguest
-# 2.2.  You should see a successfully output like this:
-#     Installing the 'vagrant-vbguest' plugin. This can take a few minutes...
-#     Installed the plugin 'vagrant-vbguest (0.12.0)'!
 
 Vagrant.configure('2') do |config|
     config.vm.box = 'ubuntu/xenial64'
