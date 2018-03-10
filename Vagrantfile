@@ -14,7 +14,7 @@ def configure_machine(config:, cpus:, memory:, ip_address:, netmask_bits:, hostn
 
   config.vm.hostname = hostname
   config.vm.network "public_network", use_dhcp_assigned_default_route: true, ip: ip_address
-  config.vm.provision "shell", run: "always", inline: "ifconfig eth1 #{ip_address}/#{netmask_bits} up"
+  config.vm.provision "shell", inline: "ip address flush dev eth1 && ip address add #{ip_address}/#{netmask_bits} dev eth1", preserve_order: true, run: "always"
 
   config.vm.provider "virtualbox"
 
