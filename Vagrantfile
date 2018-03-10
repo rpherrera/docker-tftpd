@@ -1,32 +1,60 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# Notes:
-#
-# 1.  This is a Vagrantfile example that can be used to serve firmwares to some
+# This is a Vagrantfile example that can be used to serve firmwares to some
 # routers from TP-Link family (e.g.: TL-WDR3600 or TL-WR841ND) right after they
 # being hard reset (also known as 30/30/30 procedure). It uses tftpd as a Docker
-# container to serve files placed under './tftpboot' directory from Host system.
-#
-# 2.  You must keep installed the same version from Virtual Box guest additions
-# into both Host and Guest systems. So, please do yourself a favor and before
-# running 'vagrant up' command install the 'vagrant-vbguest' plugin by means of:
-#     $ vagrant plugin install vagrant-vbguest
+# container to serve files placed under '/vagrant/tftpboot' directory from Host system.
 
-Vagrant.configure('2') do |config|
-    config.vm.box = 'ubuntu/xenial64'
+ENV["LC_ALL"] = "en_US.UTF-8"
 
-    config.vm.provider 'virtualbox' do |vbox|
-        vbox.customize ['modifyvm', :id, '--ioapic', 'on']
-        vbox.cpus = 4
-        vbox.memory = 1024
-    end
+def configure_machine(config:, cpus:, memory:, ip_address:, netmask_bits:, hostname:, name:)
+  config.vm.box = "bento/ubuntu-16.04"
+  config.vm.boot_timeout = 360
 
-    config.vm.network 'private_network', ip: '192.168.0.66'
+  config.vm.hostname = hostname
+  config.vm.network "public_network", use_dhcp_assigned_default_route: true, ip: ip_address
+  config.vm.provision "shell", run: "always", inline: "ifconfig eth1 #{ip_address}/#{netmask_bits} up"
 
-    config.vm.synced_folder "tftpboot", "/vagrant/tftpboot"
+  config.vm.provider "virtualbox"
 
-    config.vm.provision 'docker' do |docker|
-      docker.run 'tftpd', image: 'herrera/tftpd:1.0.0', args: '-v /vagrant/tftpboot:/tftpboot -p 69:69/udp'
-    end
+  config.ssh.shell = "bash"
+  config.vm.provision "shell", path: "bin/provision.sh", preserve_order: true, run: "once"
+  config.vm.provision "shell", path: "bin/docker-run.sh", preserve_order: true, run: "always"
+
+  config.vm.provider :virtualbox do |vbx|
+    vbx.name = name
+    vbx.gui = true
+    vbx.linked_clone = true
+
+    vbx.memory = memory
+    vbx.cpus = cpus
+    vbx.customize ["modifyvm", :id, "--ioapic", "on"]
+  end
+end
+
+Vagrant.configure("2") do |config|
+  config.vm.define "tftpd-server" do |tftpd_server|
+    configure_machine(
+      config: tftpd_server,
+      cpus: 1,
+      memory: 256,
+      ip_address: "192.168.10.100",
+      netmask_bits: "16",
+      hostname: "tftpd-server",
+      name: "tftpd - Default Server"
+    )
+  end
+
+  config.vm.define "tplink-unbricker", autostart: false do |tplink_unbricker|
+    configure_machine(
+      config: tplink_unbricker,
+      cpus: 1,
+      memory: 256,
+      ip_address: "192.168.0.66",
+      netmask_bits: "16",
+      hostname: "tplink-unbricker",
+      name: "tftpd - TP-Link Unbricker"
+    )
+  end
 end

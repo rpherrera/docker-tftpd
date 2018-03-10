@@ -1,7 +1,11 @@
-FROM alpine:3.4
-MAINTAINER Rafael de Paula Herrera <herrera.rp@gmail.com>
+FROM alpine:3.7
 
-RUN apk add --no-cache tftp-hpa && \
+LABEL maintainer='Rafael de Paula Herrera <herrera.rp@gmail.com>'
+
+RUN apk update && \
+    apk add tftp-hpa=5.2-r2 && \
+    rm -rf /tmp/* && \
+    rm -rf /var/cache/apk/* &&\
     mkdir -p /tftpboot
 
 VOLUME /tftpboot

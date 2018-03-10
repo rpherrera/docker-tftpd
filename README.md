@@ -2,75 +2,137 @@
 
 ## Introduction
 
-This Dockerfile provides you a simple tftpd daemon. The directory "/tftpdboot" from filesystem is exposed as a volume and you can mount it in order to get your files properly served. Only the UDP/69 port is exposed.
+This Dockerfile provides you a simple tftpd daemon. The directory "/tftpdboot" from Host filesystem is exposed as a volume and you can mount it in order to get your files properly served. Only the UDP/69 port is exposed.
 
-## Usage Example
+Both virtual machine and tftpd container were combined in order to ease the process of unbricking some old TP-Link routers (i.e.: TL-WDR3600 and TL-WR841ND), since they look for a specific IP addresse (`192.168.0.66`) after a hard reset (a.k.a. 30/30/30). But hey: you can still use it as your own tftpd server, so the default virtual machine is `tftp_server`.
 
-Please remember that you are encouraged to mount a local directory that you want to serve right into the exposed volume, so first make sure to create this directory first and fill it with your files:
+## Testing the tftpd daemon
 
-```
-$ mkdir /home/user/tftpboot
-$ echo testing-00 > /home/user/file-00.txt
-```
-
-Start tftpd as a docker container mounting some of local directory into the exposed volume and optionally bind the host UDP/69 port directly to it:
+1. Let's boot our default virtual machine:
 
 ```
-$ docker run -d -v /home/user/tftpboot:/tftpboot -p 69:69/udp -p 69:69 herrera/tftpd:1.0.0
-c57e33f60993e806392d96542b71f35f3692d1f74e8c981a33776e2721b6d735
+$ vagrant up
 ```
 
-Now get the started container IP address based on the shortened version from its ID (provided as output from the previous command) and take note:
+2. Choose an interface you want the VM gets bridged to (here `1` was chosen):
 
 ```
-$ docker inspect -f '{{ .NetworkSettings.IPAddress }}' c57e33
-172.17.0.2
+==> tftpd-server: Available bridged network interfaces:
+1) en0: Wi-Fi (AirPort)
+2) p2p0
+3) awdl0
+4) en1: Thunderbolt 1
+5) en2: Thunderbolt 2
+6) bridge0
+==> tftpd-server: When choosing an interface, it is usually the one that is
+==> tftpd-server: being used to connect to the internet.
+    tftpd-server: Which interface should the network bridge to? 1
 ```
 
-Start another container using interactive mode, which will be our client for testing purposes:
+3. Make sure your machine (`192.168.1.34` in this example) has the network configured with a netmask compatible (`192.168.0.0/16` or `255.255.0.0`) with the virtual machine (`192.168.10.100`) you just launched:
 
 ```
-$ docker run --rm --entrypoint sh -it herrera/tftpd:1.0.0
+$ ip route show
+default via 192.168.1.1 dev en0
+192.168.10.0/16 dev en0  scope link
 ```
 
-Verify the filesystem contents:
+See if you have that entries or something like this (but consider your network configuration).
+
+4. Try resolving the route:
 
 ```
-/ # ls
-bin       etc       lib       media     proc      run       srv       tftpboot  usr
-dev       home      linuxrc   mnt       root      sbin      sys       tmp       var
+$ ip route get 192.168.10.100
+192.168.10.100 dev en0  src 192.168.1.34
 ```
 
-Connect to the tftpd server and download the testing file:
+5. Put the file(s) you would like to transfer (e.g.: `wr841nv10_tp_recovery.bin`) right into the `tftpboot` directory:
+
 ```
-/ # tftp 172.17.0.2 -c get file-00.txt
+cp wr841nv10_tp_recovery.bin ./tftpboot
 ```
 
-Verify the filesystem contents and note the testing file was successfully retrieved:
+6. Connect into your tftpd virtual machine IP address and try to retrieve the file you need:
+
 ```
-/ # ls
-bin       etc       lib       media     proc      run       srv       tftpboot  usr       file-00.txt
-dev       home      linuxrc   mnt       root      sbin      sys       tmp       var
+$ tftp
+tftp> connect 192.168.10.100
+tftp> get wr841nv10_tp_recovery.bin
+Received 4089437 bytes in 0.9 seconds
+tftp> quit
 ```
 
-View the testing file contents:
+7. If you were able to transfer the file from the `tftpd` server into the current directory at Host machine, then we are good and you can proceed as usual serving your files the way you want with tftpd container.
+
+## Testing the TP-Link router unbricker
+
+Please notice this procedure was tested in the following TP-Link routers and it can no longer in different models:
+
+- TL-WDR3600
+- TL-WR841ND
+
+1. Bring the right virtual machine up:
+
 ```
-/ # cat file-00.txt
-testing-00
+$ vagrant up tplink-unbricker
 ```
 
-Exit destroying the client container (since we started it with the "--rm" option):
+2. Choose an interface you want the VM gets bridged to (here `1` was chosen):
+
 ```
-/ # exit
+==> tp-link: Available bridged network interfaces:
+1) en0: Wi-Fi (AirPort)
+2) p2p0
+3) awdl0
+4) en1: Thunderbolt 1
+5) en2: Thunderbolt 2
+6) bridge0
+==> tplink-unbricker: When choosing an interface, it is usually the one that is
+==> tplink-unbricker: being used to connect to the internet.
+    tplink-unbricker: Which interface should the network bridge to? 1
 ```
 
-Kill the server container and remove its data traces:
+3. Make sure your machine (`192.168.1.34` in this example) has the network configured with a netmask compatible (`192.168.0.0/16` or `255.255.0.0`) with the virtual machine (`192.168.0.66`) you just launched:
+
 ```
-$ docker kill c57e33 && docker rm -v c57e33
-c57e33f60993
-c57e33f60993
+$ ip route show
+default via 192.168.1.1 dev en0
+192.168.0.0/16 dev en0  scope link
 ```
+
+4. Try resolving the route:
+
+```
+$ ip route get 192.168.0.66
+192.168.0.66 dev en0  src 192.168.1.34
+```
+
+5. Put the file(s) you would like to transfer (e.g.: `wr841nv10_tp_recovery.bin`) right into the `tftpboot` directory:
+
+```
+cp wr841nv10_tp_recovery.bin ./tftpboot
+```
+
+6. Connect into your tftpd virtual machine IP address and try to retrieve the file you need:
+
+```
+$ tftp
+tftp> connect 192.168.0.66
+tftp> get wr841nv10_tp_recovery.bin
+Received 4089437 bytes in 0.9 seconds
+tftp> quit
+```
+
+7. Now you can be confident that after a hard reset (30/30/30) your router might be unbricked with more confidence and without any major networking hassles. Just remember that some routers (i.e.: TL-WDR3600, TL-WR841ND, etc) may demand you to configure your `tftpd` server IP address to `192.168.0.66`, so once the routers bootup this is the address they are going to look for a firmware, using their own tftp clients, which by the way comes builtin in their "recovery-mode".
 
 ## External References
 
  - [Docker Hub Repository](https://hub.docker.com/r/herrera/tftpd/)
+
+## Author
+
+Rafael de Paula Herrera [<herrera.rp@gmail.com>](mailto:herrera.rp@gmail.com)
+
+XMR: `46vBhfyQMMM2vu2HHNVonb4ZH3z92kAvVSvfxctEP9Kr12xPANBvwEP4NPkLfbWXDcMsvJVXwkscn48gcUAv4hBZJuFXhYS`
+
+BTC: `1boderQndxMt81ZR994WN3k6KsrEZcYkG`
