@@ -55,7 +55,7 @@ See if you have that entries or something like this (but consider your network c
 
 4. Network Routing and Troubleshooting
 
-4.1. Try resolving the route:
+  4.1. Try resolving the route:
 
 ```
 $ ip route get 192.168.10.100
@@ -64,7 +64,7 @@ $ ip route get 192.168.10.100
 
 If you can route to IP address `192.168.10.100` then we are good.
 
-4.2. Try to just 3 packets as a ping to the IP address `192.168.10.100`:
+  4.2. Try to just 3 packets as a ping to the IP address `192.168.10.100`:
 
 ```
 ping -c3 192.168.10.100
@@ -80,7 +80,7 @@ round-trip min/avg/max/stddev = 0.289/0.462/0.680/0.163 ms
 
 If you can ping the IP Address `192.168.10.100` then we are good.
 
-4.3. Reaching the VM network:
+  4.3. Reaching the VM network:
 
 If you could neither route nor ping the IP address `192.168.10.100` then you can try to set the netmask properly:
 
