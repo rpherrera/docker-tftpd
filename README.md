@@ -53,12 +53,42 @@ default via 192.168.1.1 dev en0
 
 See if you have that entries or something like this (but consider your network configuration).
 
-4. Try resolving the route:
+4. Network Routing and Troubleshooting
+
+4.1. Try resolving the route:
 
 ```
 $ ip route get 192.168.10.100
 192.168.10.100 dev en0  src 192.168.1.34
 ```
+
+If you can route to IP address `192.168.10.100` then we are good.
+
+4.2. Try to just 3 packets as a ping to the IP address `192.168.10.100`:
+
+```
+ping -c3 192.168.10.100
+PING 192.168.10.100 (192.168.10.100): 56 data bytes
+64 bytes from 192.168.10.100: icmp_seq=0 ttl=64 time=0.289 ms
+64 bytes from 192.168.10.100: icmp_seq=1 ttl=64 time=0.416 ms
+64 bytes from 192.168.10.100: icmp_seq=2 ttl=64 time=0.680 ms
+
+--- 192.168.10.100 ping statistics ---
+3 packets transmitted, 3 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 0.289/0.462/0.680/0.163 ms
+```
+
+If you can ping the IP Address `192.168.10.100` then we are good.
+
+4.3. Reaching the VM network:
+
+If you could neither route nor ping the IP address `192.168.10.100` then you can try to set the netmask properly:
+
+```
+$ sudo ip address add 192.168.1.34/16 dev en0
+```
+
+Try again (4.1), (4.2) and see if that works for you.
 
 5. Put the file(s) you would like to transfer (e.g.: `wdr3600v1_tp_recovery.bin`, `wr841nv10_tp_recovery.bin`, etc) right into the `tftpboot` directory:
 
