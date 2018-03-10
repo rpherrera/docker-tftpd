@@ -6,7 +6,21 @@ This Dockerfile provides you a simple tftpd daemon. The directory "/tftpdboot" f
 
 Both virtual machine and tftpd container were combined in order to ease the process of unbricking some old TP-Link routers (i.e.: TL-WDR3600 and TL-WR841ND), since they look for a specific IP addresse (`192.168.0.66`) after a hard reset (a.k.a. 30/30/30). But hey: you can still use it as your own tftpd server, so the default virtual machine is `tftp_server`.
 
-## Testing the tftpd daemon
+## Pre-Requisites
+
+1. [Vagrant](https://www.vagrantup.com/)
+
+2. [Docker](https://www.docker.com/): only if you want to [build/run] the Docker [image/container] locally.
+
+## Bringing up the Virtual Machines
+
+Currently there are 2 pre-configured Vagrant virtual machines:
+
+- `tftpd-server`: General purpose tftpd server, you can use it in order to test the tftpd Docker container and see how it works before you decide to put it into production.
+
+- `tplink-unbricker`: A tftpd server configured to serve as an unbricker to your bricked TP-Link routers (model TL-WDR3600 and TL-WR841ND). Maybe it can be used to unbrick more models from the TP-Link family. Any pull request regarding this would be more than welcomed.
+
+## Testing the tftpd Daemon (tftpd-server)
 
 1. Let's boot our default virtual machine:
 
@@ -46,7 +60,7 @@ $ ip route get 192.168.10.100
 192.168.10.100 dev en0  src 192.168.1.34
 ```
 
-5. Put the file(s) you would like to transfer (e.g.: `wr841nv10_tp_recovery.bin`) right into the `tftpboot` directory:
+5. Put the file(s) you would like to transfer (e.g.: `wdr3600v1_tp_recovery.bin`, `wr841nv10_tp_recovery.bin`, etc) right into the `tftpboot` directory:
 
 ```
 cp wr841nv10_tp_recovery.bin ./tftpboot
@@ -64,9 +78,9 @@ tftp> quit
 
 7. If you were able to transfer the file from the `tftpd` server into the current directory at Host machine, then we are good and you can proceed as usual serving your files the way you want with tftpd container.
 
-## Testing the TP-Link router unbricker
+## Testing the TP-Link Router Unbricker (tplink-unbricker)
 
-Please notice this procedure was tested in the following TP-Link routers and it can no longer in different models:
+Please notice this procedure was tested in the following TP-Link routers only and it can no longer works for different models:
 
 - TL-WDR3600
 - TL-WR841ND
@@ -128,6 +142,12 @@ tftp> quit
 ## External References
 
  - [Docker Hub Repository](https://hub.docker.com/r/herrera/tftpd/)
+ - [TL-WDR3600 - Download the Official Firmware](https://www.tp-link.com/br/download/TL-WDR3600.html#Firmware)
+ - [TL-WDR3600 - TFTP Auto Recovery (Old Wiki)](https://wiki.openwrt.org/toh/tp-link/tl-wdr3600#tftp_auto_recovery_in_revision_15)
+ - [TL-WDR3600 - TFTP Auto Recovery (New Wiki)](https://openwrt.org/toh/tp-link/tl-wdr3600#tftp_auto_recovery_in_revision_15)
+ - [TL-WR841ND - Download the Official Firmware](https://www.tp-link.com/br/download/TL-WR841ND.html#Firmware)
+ - [TL-WR841ND - TFTP Recovery via Bootloader (Old Wiki)](https://wiki.openwrt.org/toh/tp-link/tl-wr841nd#tftp_recovery_via_bootloader_for_v8_v9_v10_v11_v12)
+ - [TL-WR841ND - TFTP Recovery via Bootloader (New Wiki)](https://openwrt.org/toh/tp-link/tl-wr841nd#tftp_recovery_via_bootloader_for_v8_v9_v10_v11_v12)
 
 ## Author
 
