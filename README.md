@@ -4,7 +4,7 @@
 
 This Dockerfile provides you a simple tftpd daemon. The directory "/tftpdboot" from Host filesystem is exposed as a volume and you can mount it in order to get your files properly served. Only the UDP/69 port is exposed.
 
-Both virtual machine and tftpd container were combined in order to ease the process of unbricking some old TP-Link routers (i.e.: TL-WDR3600 and TL-WR841ND), since they look for a specific IP addresse (`192.168.0.66`) after a hard reset (a.k.a. 30/30/30). But hey: you can still use it as your own tftpd server, so the default virtual machine is `tftp_server`.
+Both virtual machine and tftpd container were combined in order to ease the process of unbricking some old TP-Link routers (i.e.: TL-WDR3600 and TL-WR841ND), since they look for a specific IP address (`192.168.0.66`) after a [hard reset (a.k.a. 30/30/30)](https://www.dd-wrt.com/wiki/index.php/Hard_reset_or_30/30/30). But hey: you can still use it as your own tftpd server, so the default virtual machine is `tftp_server`.
 
 ## Pre-Requisites
 
@@ -171,6 +171,9 @@ tftp> quit
 
 ## External References
 
+ - [Hard Reset or 30/30/30](https://www.dd-wrt.com/wiki/index.php/Hard_reset_or_30/30/30)
+ - [Vagrant](https://www.vagrantup.com/)
+ - [Docker](https://www.docker.com/)
  - [Docker Hub Repository](https://hub.docker.com/r/herrera/tftpd/)
  - [TL-WDR3600 - Download the Official Firmware](https://www.tp-link.com/br/download/TL-WDR3600.html#Firmware)
  - [TL-WDR3600 - TFTP Auto Recovery (Old Wiki)](https://wiki.openwrt.org/toh/tp-link/tl-wdr3600#tftp_auto_recovery_in_revision_15)
