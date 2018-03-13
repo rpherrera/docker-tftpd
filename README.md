@@ -124,50 +124,61 @@ $ vagrant up tplink-unbricker
 2. Choose an interface you want the VM gets bridged to (here `1` was chosen):
 
 ```
-==> tp-link: Available bridged network interfaces:
+==> tplink-unbricker: Available bridged network interfaces:
+==> tplink-unbricker: Available bridged network interfaces:
 1) en0: Wi-Fi (AirPort)
-2) p2p0
-3) awdl0
-4) en1: Thunderbolt 1
-5) en2: Thunderbolt 2
-6) bridge0
+2) en3: Thunderbolt Ethernet
+3) p2p0
+4) awdl0
+5) en1: Thunderbolt 1
+6) en2: Thunderbolt 2
+7) bridge0
 ==> tplink-unbricker: When choosing an interface, it is usually the one that is
 ==> tplink-unbricker: being used to connect to the internet.
-    tplink-unbricker: Which interface should the network bridge to? 1
+    tplink-unbricker: Which interface should the network bridge to? 2
 ```
 
-3. Make sure your machine (`192.168.1.34` in this example) has the network configured with a netmask compatible (`192.168.0.0/16` or `255.255.0.0`) with the virtual machine (`192.168.0.66`) you just launched:
+3. SSH into VM:
 
 ```
-$ ip route show
-default via 192.168.1.1 dev en0
-192.168.0.0/16 dev en0  scope link
+vagrant ssh tplink-unbricker
 ```
 
-4. Try resolving the route:
+5. Put the file(s) you would like to transfer (e.g.: `wr841nv10_tp_recovery.bin` or `wdr3600v1_tp_recovery.bin`) right into the `tftpboot` directory:
 
 ```
-$ ip route get 192.168.0.66
-192.168.0.66 dev en0  src 192.168.1.34
+cp /vagrant/firmwares/wdr3600v1_tp_recovery.bin /vagrant/tftpboot
 ```
 
-5. Put the file(s) you would like to transfer (e.g.: `wr841nv10_tp_recovery.bin`) right into the `tftpboot` directory:
+Pay attention to `/vagrant/firmwares` directory: here we assume you have downloaded your firmware and already put the `.bin` file there (which in our example is `wr841nv10_tp_recovery.bin`). So this step is up to you and you should find any firmware you like. After some trials and errors, we just found that the unbrick process always worked when used [this dd-wrt image: `factory-to-ddwrt.bin`](https://www.dd-wrt.com/routerdb/de/download/TP-Link/TL-WDR3600/v1.x/factory-to-ddwrt.bin/4129) as firmware image (MD5: `7ae4f25869bd85bc6f12921aa508e143`).
+
+6. Inspect traffic through `tcpdump`:
 
 ```
-cp wr841nv10_tp_recovery.bin ./tftpboot
+sudo tcpdump -i eth1 -n udp port 69
 ```
 
-6. Connect into your tftpd virtual machine IP address and try to retrieve the file you need:
+7. Perform the [Hard Reset or 30/30/30](https://www.dd-wrt.com/wiki/index.php/Hard_reset_or_30/30/30) on your router. Usually you will need to:
+
+7.1. Power on the router
+7.2. Press the WPS button and keep holding
+7.3. Wait for at least 30 seconds
+7.4. Power off the router by disconnecting its power chord supply
+7.5. Wait for at least 30 seconds
+7.6. Power on the router by connecting its power chord supply
+7.7. Wait for at least 30 seconds
+
+8. Keep an eye in `tcpdump` output and check if there are log entries like this:
 
 ```
-$ tftp
-tftp> connect 192.168.0.66
-tftp> get wr841nv10_tp_recovery.bin
-Received 4089437 bytes in 0.9 seconds
-tftp> quit
+01:27:21.321957 IP 192.168.0.86.3511 > 192.168.0.66.69:  44 RRQ "wdr3600v1_tp_recovery.bin" octet timeout 5
 ```
 
-7. Now you can be confident that after a hard reset (30/30/30) your router might be unbricked with more confidence and without any major networking hassles. Just remember that some routers (i.e.: TL-WDR3600, TL-WR841ND, etc) may demand you to configure your `tftpd` server IP address to `192.168.0.66`, so once the routers bootup this is the address they are going to look for a firmware, using their own tftp clients, which by the way comes builtin in their "recovery-mode".
+If so, that means your router is looking for `wdr3600v1_tp_recovery.bin` file inside your `tftpd` server, so please just double-check and make sure you have put the right file into the `tftpboot` directory.
+
+When the firmware file is found successfully, the router downloads it and start re-flashing itself, so look at the update led that should be blinking for a while. If the re-flash process runs smootlhy the router will reboot itself and then after the power up it gets running as usual according to the default behavior found in the firmware you provided.
+
+Warning: If all router led lights are now in a state of non-stop blinking it means that the re-flashing processes has failed, so you will have to provide another firmware as your recovery file to `tftpd` (step 5) and start over again the 30/30/30 (step 7).
 
 ## External References
 
