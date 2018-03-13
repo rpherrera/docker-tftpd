@@ -150,7 +150,7 @@ vagrant ssh tplink-unbricker
 cp /vagrant/firmwares/wdr3600v1_tp_recovery.bin /vagrant/tftpboot
 ```
 
-Pay attention to `/vagrant/firmwares` directory: here we assume you have downloaded your firmware and already put the `.bin` file there (which in our example is `wr841nv10_tp_recovery.bin`). So this step is up to you and you should find any firmware you like. After some trials and errors, we just found that the unbrick process always worked when used [this dd-wrt image: `factory-to-ddwrt.bin`](https://www.dd-wrt.com/routerdb/de/download/TP-Link/TL-WDR3600/v1.x/factory-to-ddwrt.bin/4129) as firmware image (MD5: `7ae4f25869bd85bc6f12921aa508e143`).
+Pay attention to `/vagrant/firmwares` directory: here we assume you have downloaded your firmware and already put the `.bin` file there (which in our example is `wr841nv10_tp_recovery.bin`). So this step is up to you and you should find any firmware you like. After some trials and errors, we just found that the unbrick process always worked on `TL-WDR3600` when used [this dd-wrt image: `factory-to-ddwrt.bin`](https://www.dd-wrt.com/routerdb/de/download/TP-Link/TL-WDR3600/v1.x/factory-to-ddwrt.bin/4129) as firmware image (MD5: `7ae4f25869bd85bc6f12921aa508e143`).
 
 6. Inspect traffic through `tcpdump`:
 
@@ -182,6 +182,8 @@ Warning: If all router led lights are now in a state of non-stop blinking it mea
 
 ## External References
 
+ - [GitHub `rpherrera/docker-tftpd`](https://github.com/rpherrera/docker-tftpd)
+ - [DockerHub `herrera/tftpd`](https://hub.docker.com/r/herrera/tftpd/)
  - [Hard Reset or 30/30/30](https://www.dd-wrt.com/wiki/index.php/Hard_reset_or_30/30/30)
  - [Vagrant](https://www.vagrantup.com/)
  - [Docker](https://www.docker.com/)
@@ -192,6 +194,7 @@ Warning: If all router led lights are now in a state of non-stop blinking it mea
  - [TL-WR841ND - Download the Official Firmware](https://www.tp-link.com/br/download/TL-WR841ND.html#Firmware)
  - [TL-WR841ND - TFTP Recovery via Bootloader (Old Wiki)](https://wiki.openwrt.org/toh/tp-link/tl-wr841nd#tftp_recovery_via_bootloader_for_v8_v9_v10_v11_v12)
  - [TL-WR841ND - TFTP Recovery via Bootloader (New Wiki)](https://openwrt.org/toh/tp-link/tl-wr841nd#tftp_recovery_via_bootloader_for_v8_v9_v10_v11_v12)
+ - [Firmware Image that always worked on `TL-WDR3600`: `factory-to-ddwrt.bin` (MD5: `7ae4f25869bd85bc6f12921aa508e143`)](https://www.dd-wrt.com/routerdb/de/download/TP-Link/TL-WDR3600/v1.x/factory-to-ddwrt.bin/4129)
 
 ## Author
 
